@@ -3,25 +3,13 @@ from datetime import datetime
 from django.utils import timezone
 #from resources import
 
-# CREATE TABLE ORDERS(
-#     order_id INT AUTO_INCREMENT NOT NULL,
-#     time_in DATETIME NOT NULL,
-#     time_out DATETIME,
-#     cost FLOAT NOT NULL,
-#     take_away INT NOT NULL,
-#     staff INT NOT NULL,
-#
-#     PRIMERY KEY(order_id),
-#     FOREIGN KEY(staff) REFERENCES STAFF(staff_id)
-# );
-
 class Order(models.Model):
     time_in = models.DateTimeField(auto_now_add=True)
     time_out = models.DateTimeField(null=True)
     cost = models.FloatField(default=0.0)
     take_away = models.BooleanField(default=False)
     complete = models.BooleanField(default=False)
-    staff = models.ForeignKey("Staff", on_delete=models.CASCADE)
+    staff = models.ForeignKey("Staff", on_delete=models.CASCADE) #staff = models.ForeignKey("Staff", on_delete=models.CASCADE, related_name='orders')
     products = models.ManyToManyField("Product", through='ProductOrder')
 
     def finish_order(self):
@@ -82,15 +70,15 @@ class Staff(models.Model):
 class ProductOrder(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     order = models.ForeignKey(Order, on_delete=models.CASCADE)
-    amount = models.IntegerField(default=1, db_column='amount')   #amount = models.IntegerField(default=1)
+    _amount = models.IntegerField(default=1, db_column='amount')   #amount = models.IntegerField(default=1)
 
     def product_sum(self):
         product_price = self.product.price
-        return product_price * self.amount
+        return product_price * self._amount
 
     @property
     def amount(self, value):
-        return self.amount
+        return self._amount
 
     @amount.setter
     def amount(self, value):
